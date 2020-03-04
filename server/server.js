@@ -27,11 +27,12 @@ var app = connect();
 app.use(serveStatic('public'));
 
 var server = https.createServer(options,app);
-server.listen(9191);
+server.listen(3389);
 
-opener("https://localhost:9191");
+opener("http://localhost:3389");
 
 var server = binaryServer({server:server});
+var fileName;
 
 server.on('connection', function(client) {
     console.log("new connection...");
@@ -43,9 +44,27 @@ server.on('connection', function(client) {
     var ua = uaParser.getResult();
 
     client.on('stream', function(stream, meta) {
+	    if (meta == null) {
+		stream.on('data', function(text){
+
+        	if ( fileWriter != null ) {
+            		fileWriter.end();
+			fileWriter = null;
+		}
+		size = fs.statSync(fileName + ".wav").size;
+		data = fileName + ".wav," + size + "," + text + "\n"
+                fs.appendFile("train.csv", data, function(err) {
+        	if(err) {
+          		 return console.log(err);
+      		}
+    		console.log("The file was saved! - " + data);
+	       });
+		});
+		return;
+	    }
 
         console.log("Stream Start@" + meta.sampleRate +"Hz");
-        var fileName = "recordings/"+ ua.os.name +"-"+ ua.os.version +"_"+ new Date().getTime();
+        fileName = "recordings/unz_en_gen_"+ new Date().getTime();
         
         switch(CONFIG.AudioEncoding){
             case "WAV":
@@ -70,7 +89,7 @@ server.on('connection', function(client) {
     });
 
     
-    client.on('close', function() {
+    client.on('close', function(speechtext) {
         if ( fileWriter != null ) {
             fileWriter.end();
         } else if ( writeStream != null ) {

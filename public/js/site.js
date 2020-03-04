@@ -7,8 +7,9 @@ $(function () {
         recorder,
         context,
         bStream,
-        contextSampleRate = (new AudioContext()).sampleRate;
+        contextSampleRate = (new AudioContext({sampleRate:16000})).sampleRate;
         resampleRate = contextSampleRate,
+		console.log("Sample Rate:" +contextSampleRate );
         worker = new Worker('js/worker/resampler-worker.js');
 
     worker.postMessage({cmd:"init",from:contextSampleRate,to:resampleRate});
@@ -101,10 +102,20 @@ $(function () {
 
     function close(){
         console.log('close');
-        if(recorder)
+	var text;
+        if(recorder) {
+	    text = document.getElementById('speechtext'); 
+		if(client)
+	    client.send(text.value);
             recorder.disconnect();
-        if(client)
-            client.close();
+	    recorder = null;
+		context=null;
+	}
+        if(client) {
+		// client.close();
+	     
+ 	    //console.log("Text = " + text.value);
+	}
     }
 });
 
