@@ -7,7 +7,7 @@ $(function () {
         recorder,
         context,
         bStream,
-        contextSampleRate = (new AudioContext({sampleRate:16000})).sampleRate;
+        contextSampleRate = (new AudioContext()).sampleRate;
         resampleRate = contextSampleRate,
 		console.log("Sample Rate:" +contextSampleRate );
         worker = new Worker('js/worker/resampler-worker.js');

@@ -27,12 +27,13 @@ var app = connect();
 app.use(serveStatic('public'));
 
 var server = https.createServer(options,app);
-server.listen(3389);
+server.listen(8080);
 
-opener("http://localhost:3389");
+opener("http://127.0.0.1:8080");
 
 var server = binaryServer({server:server});
 var fileName;
+var fileNameOnly;
 
 server.on('connection', function(client) {
     console.log("new connection...");
@@ -52,7 +53,7 @@ server.on('connection', function(client) {
 			fileWriter = null;
 		}
 		size = fs.statSync(fileName + ".wav").size;
-		data = fileName + ".wav," + size + "," + text + "\n"
+		data = fileNameOnly + ".wav," + size + "," + text + "\n"
                 fs.appendFile("train.csv", data, function(err) {
         	if(err) {
           		 return console.log(err);
@@ -64,7 +65,10 @@ server.on('connection', function(client) {
 	    }
 
         console.log("Stream Start@" + meta.sampleRate +"Hz");
-        fileName = "recordings/unz_en_gen_"+ new Date().getTime();
+	folder = "recordings/"
+        fileNameOnly = "unz_en_gen_"+ new Date().getTime();
+        fileName = folder+fileNameOnly; 
+	
         
         switch(CONFIG.AudioEncoding){
             case "WAV":
